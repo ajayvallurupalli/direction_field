@@ -1,0 +1,6 @@
+#lang racket/gui
+
+(define frame (new frame%
+                   [label "Slope Field"]
+                   [width 600]
+                   [height 400]))
