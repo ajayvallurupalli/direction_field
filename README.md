@@ -1,3 +1,1 @@
-A simple slope field grapher made in racket. 
-It can graph slope fields for a given matrix, and it can plot the trajectory of a vector repeatedly multiplied by such matrix.
-The scale is in the 100s, though maybe I'll add a scale slider in the future.
+A simple slope field grapher made in racket. It can graph slope fields for a given matrix, and it can plot the trajectory of a vector flying througnh the slope field. The program uses a simple euler's method to aproximate where the vector should be. The first slider increases the number of multiplications steps, and the second increases the steps size. The higher the second slider, the more accurate the data, and the higher the first slider, the more-er the data. 
