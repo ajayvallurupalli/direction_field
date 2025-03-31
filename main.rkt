@@ -156,10 +156,13 @@
   (define bl (string->number (send matrix-bottom-left get-value)))
   (define br (string->number (send matrix-bottom-right get-value)))
 
-  (define pen (make-object color%
+  (define pen
+    (new pen%
+         [color (make-object color%
                 (random 1 180)
                 (random 1 180)
-                (random 1 180)))
+                (random 1 180))]
+         [width 3]))
   
   (if (and top bottom tl tr bl br)
       (begin
@@ -169,20 +172,16 @@
                                            (col-matrix [top bottom])
                                            (matrix [[tl tr] [bl br]])
                                            (send slider get-value)
-                                           (send slider get-value)
                                            1
                                            (send slider-2 get-value)
-                                           pen
-                                           dc)))
+                                           pen)))
                             (thread (λ () (trajectory
                                            (col-matrix [top bottom])
                                            (matrix [[tl tr] [bl br]])
                                            (send slider get-value)
-                                           (send slider get-value)
                                            -1
                                            (send slider-2 get-value)
-                                           pen
-                                           dc)))))))
+                                           pen)))))))
       (send dc draw-text
             "The numbers given are not numbers man"
             (/ WIDTH 2)
@@ -209,25 +208,18 @@
                       [init-value 500]
                       [style (list 'horizontal 'vertical-label)]))  
 
-(struct drawing (type data pen))
+(struct drawing (data pen))
 
 (define (drawing-manager dc)
   (define order (thread-receive))
   (define data (drawing-data order))
   (send dc set-pen (drawing-pen order))
 
-  (if (= drawing-type 'text)
-      (send dc draw-text
-            (first data) ;test
-            (second data);x
-            (third data))  ;y
-      (if (= drawing-type 'line)
-          (send dc draw-line
-                (first data)
-                (second data)
-                (third data)
-                (fourth data))
-          (void)))
+  (send dc draw-line
+        (first data)
+        (second data)
+        (third data)
+        (fourth data))
 
   (drawing-manager dc))
   
@@ -245,25 +237,22 @@
   (send dc set-pen "black" 1 'solid)
   (send dc set-font (make-object font% 12 'swiss)))
 
-(define (trajectory vector matrix iterations total-iterations sign step pen dc)
-  (send dc set-pen pen 2 'solid)
+(define (trajectory vector matrix iterations sign step pen)
   (define next (matrix+ (matrix-map (λ (a) (/ (* a sign) step)) (matrix* matrix vector)) vector))
   (define next-pair (matrix->list next))
   (define vector-pair (matrix->list vector))
   
-  (send dc draw-line
-        (+ (first vector-pair) (/ WIDTH 2))
-        (- (/ HEIGHT 2) (second vector-pair))
-        (+ (first next-pair) (/ WIDTH 2))
-        (- (/ HEIGHT 2) (second next-pair)))
-  (when (= 0 (remainder iterations step))
-    (send dc draw-text
-          (number->string (* sign (quotient (- total-iterations iterations -1) step)))
-          (+ (first vector-pair) (/ WIDTH 2))
-          (-  (/ HEIGHT 2) (second vector-pair))))
+  (thread-send drawing-thread
+               (drawing
+                (list
+                 (+ (first vector-pair) (/ WIDTH 2))
+                 (- (/ HEIGHT 2) (second vector-pair))
+                 (+ (first next-pair) (/ WIDTH 2))
+                 (- (/ HEIGHT 2) (second next-pair)))
+                pen))
 
   (unless (= iterations 0)
-    (trajectory next matrix (sub1 iterations) total-iterations sign step pen dc)))
+    (trajectory next matrix (sub1 iterations) sign step pen)))
 
 (send dc set-font
       (make-object font%

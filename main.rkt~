@@ -1,11 +1,6 @@
-#lang racket/gui
+#lang racket/base
 
-;todo
-;set pen when drawing slopes
-;create semaphore for vector-trajectory so it can stop drawing when user redraws
-;
-
-(require math/matrix)
+(require math/matrix racket/gui)
 
 (define WIDTH 600)
 (define HEIGHT 400)
@@ -46,7 +41,6 @@
                               [label ""]
                               [parent matrix-top]
                               [init-value "8"]))
-
 
 (define matrix-bottom (new horizontal-panel%
                            [parent matrix-panel]
@@ -172,23 +166,23 @@
         (set! working-threads
               (append working-threads
                       (list (thread (λ () (trajectory
-                                     (col-matrix [top bottom])
-                                     (matrix [[tl tr] [bl br]])
-                                     (send slider get-value)
-                                     (send slider get-value)
-                                     1
-                                     (send slider-2 get-value)
-                                     pen
-                                     dc)))
-                      (thread (λ () (trajectory
-                                     (col-matrix [top bottom])
-                                     (matrix [[tl tr] [bl br]])
-                                     (send slider get-value)
-                                     (send slider get-value)
-                                     -1
-                                     (send slider-2 get-value)
-                                     pen
-                                     dc)))))))
+                                           (col-matrix [top bottom])
+                                           (matrix [[tl tr] [bl br]])
+                                           (send slider get-value)
+                                           (send slider get-value)
+                                           1
+                                           (send slider-2 get-value)
+                                           pen
+                                           dc)))
+                            (thread (λ () (trajectory
+                                           (col-matrix [top bottom])
+                                           (matrix [[tl tr] [bl br]])
+                                           (send slider get-value)
+                                           (send slider get-value)
+                                           -1
+                                           (send slider-2 get-value)
+                                           pen
+                                           dc)))))))
       (send dc draw-text
             "The numbers given are not numbers man"
             (/ WIDTH 2)
